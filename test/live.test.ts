@@ -4,6 +4,7 @@ import dgram from "node:dgram";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import net from "node:net";
 import { collectSockets } from "../src/netstat.js";
 import { ProcessTable } from "../src/processes.js";
 
@@ -74,6 +75,24 @@ test("reads the live connection table and process names", async () => {
   } finally {
     table.close();
   }
+});
+
+test("prints the public ipv4 and ipv6 addresses", async () => {
+  const result = await runCli(["--public-ip"]);
+  assert.equal(result.code, 0, result.stderr);
+  const ipv4 = /^IPv4\s+(\S+)/m.exec(result.stdout)?.[1];
+  const ipv6 = /^IPv6\s+(\S+)/m.exec(result.stdout)?.[1];
+  assert.ok(ipv4, result.stdout);
+  assert.ok(ipv6, result.stdout);
+  if (ipv4 !== "不可用") assert.equal(net.isIP(ipv4), 4);
+  if (ipv6 !== "不可用") assert.equal(net.isIP(ipv6), 6);
+  assert.ok(ipv4 !== "不可用" || ipv6 !== "不可用");
+
+  const json = await runCli(["--public-ip", "--json"]);
+  assert.equal(json.code, 0, json.stderr);
+  const body = JSON.parse(json.stdout) as { ipv4: string | null; ipv6: string | null };
+  if (body.ipv4) assert.equal(net.isIP(body.ipv4), 4);
+  if (body.ipv6) assert.equal(net.isIP(body.ipv6), 6);
 });
 
 test("cli snapshot and filters", async () => {

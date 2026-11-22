@@ -4,6 +4,7 @@ import { ArgError } from "./errors.js";
 import { filterSockets } from "./filter.js";
 import { collectSockets, stopCollection } from "./netstat.js";
 import { ProcessTable } from "./processes.js";
+import { formatPublicIp, lookupPublicAddresses, PublicIpQuery } from "./publicIp.js";
 import { renderJson, renderTable } from "./render.js";
 import { Tracker } from "./track.js";
 
@@ -24,6 +25,17 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     return;
   }
 
+  if (options.publicIp) {
+    process.on("SIGINT", () => process.exit(0));
+    const addresses = await lookupPublicAddresses();
+    if (!addresses.ipv4 && !addresses.ipv6) {
+      console.error("无法查询本机公网地址。请检查网络连接后重试。");
+      process.exit(1);
+    }
+    process.stdout.write(formatPublicIp(addresses, options.json));
+    return;
+  }
+
   if (process.platform !== "win32") {
     console.error("此工具只支持 Windows。");
     process.exit(1);
@@ -32,6 +44,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
   const processes = new ProcessTable();
   const tracker = new Tracker();
   const dnsCache = new ReverseDns(options.dns);
+  const publicIp = options.json ? undefined : new PublicIpQuery();
   let stopping = false;
   let timer: NodeJS.Timeout | undefined;
 
@@ -40,6 +53,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     stopping = true;
     if (timer) clearTimeout(timer);
     stopCollection();
+    publicIp?.stop();
     processes.close();
     process.exit(code);
   };
@@ -60,7 +74,9 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       const now = Date.now();
       const snapshot = tracker.update(filtered, names, now);
       for (const row of snapshot.rows) dnsCache.request(row.remoteIp);
-      if (options.once) await dnsCache.settle(400);
+      if (options.once) {
+        await Promise.all([dnsCache.settle(400), publicIp?.settle(2500)]);
+      }
       if (stopping) return;
 
       const text = options.json
@@ -71,6 +87,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
             filters: options,
             color: useColor(),
             columns: process.stdout.columns ?? 120,
+            publicIp: publicIp?.line(),
             hostOf: (ip) => dnsCache.host(ip),
           });
 

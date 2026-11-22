@@ -6,6 +6,7 @@ export interface CliOptions extends Filters {
   intervalMs: number;
   json: boolean;
   dns: boolean;
+  publicIp: boolean;
   help: boolean;
 }
 
@@ -26,6 +27,8 @@ export const HELP = `本机对外连接监视
   --process <name>       按进程名子串过滤，不区分大小写
   --json                 每行一条 JSON
   --no-dns               关闭远端 IP 反查
+  --public-ip            查询本机公网 IPv4 / IPv6 后退出
+                         文本表格的表头也会显示公网地址
   --help                 显示此说明
 `;
 
@@ -36,6 +39,7 @@ export function parseArgs(argv: string[]): CliOptions {
     proto: "all",
     json: false,
     dns: true,
+    publicIp: false,
     help: false,
   };
 
@@ -47,6 +51,8 @@ export function parseArgs(argv: string[]): CliOptions {
       options.json = true;
     } else if (arg === "--no-dns") {
       options.dns = false;
+    } else if (arg === "--public-ip") {
+      options.publicIp = true;
     } else if (arg === "--help" || arg === "-h") {
       options.help = true;
     } else if (arg === "--interval" || arg.startsWith("--interval=")) {

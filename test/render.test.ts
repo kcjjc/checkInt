@@ -25,11 +25,13 @@ test("marks a new remote ip and lists it in the summary", () => {
     filters: { proto: "all" },
     color: true,
     columns: 120,
+    publicIp: "公网 IPv4 198.51.100.10  IPv6 不可用",
     hostOf: () => "blackhole.test",
   });
   assert.match(text, /新/);
   assert.match(text, /203\.0\.113\.10:9 \(blackhole\.test\)/);
   assert.match(text, /\x1b\[93m/);
+  assert.match(text, /公网 IPv4 198\.51\.100\.10/);
   assert.match(text, /新增 1/);
   assert.match(text, /消失 0/);
   assert.doesNotMatch(text, /LISTENING|Listen/);

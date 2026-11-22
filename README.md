@@ -96,6 +96,18 @@ npm run dev -- --json --interval 1000
 npm run dev -- --no-dns --once
 ```
 
+查询本机公网 IPv4 和 IPv6。没有该协议的地址时显示「不可用」；两个都查不到则以非 0 退出。`--json` 输出一行，缺失的协议为 `null`：
+
+```powershell
+npm run dev -- --public-ip
+```
+
+```powershell
+npm run dev -- --public-ip --json
+```
+
+文本表格的表头也会显示公网地址。查询在后台进行，不会挡住连接表刷新；单次快照会最多再等 2.5 秒。本机没有可用的 IPv6 出口时，IPv6 显示为「不可用」。`--json` 的连接输出不包含公网地址，需要单独执行上面的命令。
+
 查看参数说明：
 
 ```powershell

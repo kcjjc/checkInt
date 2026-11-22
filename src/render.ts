@@ -16,6 +16,7 @@ export interface TableView {
   filters: Filters;
   color: boolean;
   columns: number;
+  publicIp?: string;
   hostOf(ip: string): string | undefined;
 }
 
@@ -62,6 +63,7 @@ export function renderTable(snapshot: Snapshot, view: TableView): string {
   const lines = [
     `${formatDateTime(view.now)}  对外连接 ${snapshot.rows.length} 条  间隔 ${view.intervalMs}ms`,
   ];
+  if (view.publicIp) lines.push(view.publicIp);
   const filterLine = describeFilters(view.filters);
   if (filterLine) lines.push(`筛选  ${filterLine}`);
   lines.push(join(HEADERS));

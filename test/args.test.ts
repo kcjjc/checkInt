@@ -10,6 +10,7 @@ test("defaults to a one second watch of every protocol", () => {
   assert.equal(options.proto, "all");
   assert.equal(options.json, false);
   assert.equal(options.dns, true);
+  assert.equal(options.publicIp, false);
 });
 
 test("reads flags in both spaced and equals forms", () => {
@@ -25,6 +26,7 @@ test("reads flags in both spaced and equals forms", () => {
     "Chrome",
     "--json",
     "--no-dns",
+    "--public-ip",
   ]);
   assert.equal(options.once, true);
   assert.equal(options.intervalMs, 250);
@@ -34,6 +36,7 @@ test("reads flags in both spaced and equals forms", () => {
   assert.equal(options.process, "Chrome");
   assert.equal(options.json, true);
   assert.equal(options.dns, false);
+  assert.equal(options.publicIp, true);
 });
 
 test("rejects an interval below 200ms and unknown flags", () => {
