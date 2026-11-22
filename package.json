@@ -4,6 +4,7 @@
   "private": true,
   "description": "Watch outbound TCP and UDP connections on Windows",
   "type": "module",
+  "main": "dist/desktop/main.js",
   "engines": {
     "node": ">=20"
   },
@@ -11,10 +12,12 @@
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "desktop": "tsc && node scripts/stage-desktop.mjs && electron .",
     "test": "tsx --test test/*.test.ts"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "electron": "^45.4.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }

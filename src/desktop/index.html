@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'" />
+    <title>check-int</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <h1>check-int</h1>
+        <p id="status">正在读取连接表</p>
+      </div>
+      <div class="public" id="public-ip" title="点击复制">
+        <span>公网</span>
+        <strong id="public-text">查询中</strong>
+      </div>
+    </header>
+    <form class="filters" id="filters" autocomplete="off">
+      <label>协议
+        <select id="proto">
+          <option value="all">全部</option>
+          <option value="tcp">TCP</option>
+          <option value="udp">UDP</option>
+        </select>
+      </label>
+      <label>远端 IP 前缀
+        <input id="ip" type="text" spellcheck="false" autocomplete="off" />
+      </label>
+      <label>远端端口
+        <input id="port" type="number" min="1" max="65535" autocomplete="off" />
+      </label>
+      <label>进程
+        <input id="process" type="text" spellcheck="false" autocomplete="off" />
+      </label>
+      <label>间隔
+        <input id="interval" type="number" min="200" max="60000" value="1000" />
+      </label>
+      <label class="check">
+        <input id="dns" type="checkbox" checked />
+        反查域名
+      </label>
+    </form>
+    <p class="banner" id="banner" hidden></p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>标记</th>
+            <th>协议</th>
+            <th>本地地址</th>
+            <th>远端</th>
+            <th>状态</th>
+            <th>进程</th>
+            <th>PID</th>
+            <th>首次发现</th>
+            <th>最近可见</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p class="empty" id="empty" hidden>当前没有符合条件的对外连接</p>
+    </div>
+    <footer id="summary">新增 0  |  消失 0</footer>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

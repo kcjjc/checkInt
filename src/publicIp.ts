@@ -40,6 +40,7 @@ export class PublicIpQuery {
   private pending = true;
   private inflight: Promise<void> | null = null;
   private timer: NodeJS.Timeout | undefined;
+  private readonly settled = new Set<() => void>();
 
   constructor(private readonly lookup: () => Promise<PublicAddresses> = lookupPublicAddresses) {
     void this.refresh();
@@ -52,6 +53,15 @@ export class PublicIpQuery {
   line(): string {
     if (this.pending) return "公网 查询中";
     return `公网 IPv4 ${this.ipv4 ?? "不可用"}  IPv6 ${this.ipv6 ?? "不可用"}`;
+  }
+
+  isPending(): boolean {
+    return this.pending;
+  }
+
+  onSettled(listener: () => void): () => void {
+    this.settled.add(listener);
+    return () => this.settled.delete(listener);
   }
 
   settle(timeoutMs: number): Promise<void> {
@@ -82,6 +92,7 @@ export class PublicIpQuery {
       .finally(() => {
         this.pending = false;
         this.inflight = null;
+        for (const listener of this.settled) listener();
       });
     return this.inflight;
   }
